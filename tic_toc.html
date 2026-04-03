@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 en Raya</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background:#111;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+margin:0;
+}
+
+h1{
+margin-bottom:10px;
+}
+
+.players{
+display:flex;
+gap:10px;
+margin-bottom:10px;
+}
+
+.players input{
+padding:5px;
+border-radius:5px;
+border:none;
+}
+
+.scoreboard{
+margin-bottom:15px;
+}
+
+.board{
+display:grid;
+grid-template-columns:repeat(3,100px);
+grid-template-rows:repeat(3,100px);
+gap:5px;
+}
+
+.cell{
+background:#222;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:2.5em;
+cursor:pointer;
+border-radius:8px;
+}
+
+.cell:hover{
+background:#333;
+}
+
+button{
+margin-top:15px;
+padding:8px 15px;
+border:none;
+border-radius:6px;
+background:#2ecc71;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#27ae60;
+}
+
+.status{
+margin-top:10px;
+font-size:18px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>3 en Raya</h1>
+
+<div class="players">
+<input id="p1" placeholder="Jugador 1 (X)">
+<input id="p2" placeholder="Jugador 2 (O)">
+</div>
+
+<div class="scoreboard">
+<span id="scoreX">X: 0</span> |
+<span id="scoreO">O: 0</span> |
+Empates: <span id="draws">0</span>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="status" id="status">Turno de X</div>
+
+<button onclick="restart()">Reiniciar tablero</button>
+
+<script>
+
+const board = document.getElementById("board")
+const statusText = document.getElementById("status")
+
+let currentPlayer = "X"
+let gameActive = true
+
+let boardState = ["","","","","","","","",""]
+
+let scoreX = 0
+let scoreO = 0
+let draws = 0
+
+function createBoard(){
+
+board.innerHTML=""
+
+boardState.forEach((cell,index)=>{
+
+const div = document.createElement("div")
+div.classList.add("cell")
+div.dataset.index = index
+
+div.addEventListener("click",handleMove)
+
+board.appendChild(div)
+
+})
+
+}
+
+function handleMove(e){
+
+const index = e.target.dataset.index
+
+if(boardState[index]!=="" || !gameActive) return
+
+boardState[index]=currentPlayer
+e.target.textContent=currentPlayer
+
+checkWinner()
+
+currentPlayer = currentPlayer==="X" ? "O" : "X"
+
+updateTurn()
+
+}
+
+function updateTurn(){
+
+if(!gameActive) return
+
+const p1 = document.getElementById("p1").value || "Jugador X"
+const p2 = document.getElementById("p2").value || "Jugador O"
+
+statusText.textContent = currentPlayer==="X"
+? "Turno de " + p1
+: "Turno de " + p2
+
+}
+
+function checkWinner(){
+
+const wins = [
+
+[0,1,2],
+[3,4,5],
+[6,7,8],
+[0,3,6],
+[1,4,7],
+[2,5,8],
+[0,4,8],
+[2,4,6]
+
+]
+
+for(let combo of wins){
+
+let [a,b,c] = combo
+
+if(boardState[a] &&
+boardState[a]===boardState[b] &&
+boardState[a]===boardState[c]){
+
+gameActive=false
+
+if(boardState[a]==="X"){
+
+scoreX++
+document.getElementById("scoreX").textContent="X: "+scoreX
+
+}else{
+
+scoreO++
+document.getElementById("scoreO").textContent="O: "+scoreO
+
+}
+
+const p1 = document.getElementById("p1").value || "Jugador X"
+const p2 = document.getElementById("p2").value || "Jugador O"
+
+statusText.textContent = boardState[a]==="X"
+? p1+" gana!"
+: p2+" gana!"
+
+return
+}
+
+}
+
+if(!boardState.includes("")){
+
+gameActive=false
+draws++
+document.getElementById("draws").textContent=draws
+statusText.textContent="Empate"
+
+}
+
+}
+
+function restart(){
+
+boardState = ["","","","","","","","",""]
+gameActive = true
+currentPlayer = "X"
+
+createBoard()
+updateTurn()
+
+}
+
+createBoard()
+updateTurn()
+
+</script>
+
+</body>
+</html>
